@@ -6,9 +6,19 @@ Keepward is a tower defence game. A column follows one road to the gate. Archers
 
 ## Play
 
+The match runs in the browser on a phone, a tablet or a desktop:
+
+https://alexalghisi.github.io/tower-defence-game/
+
+The same build is on the releases page, packed to be served from the root of a static host:
+
+https://github.com/alexalghisi/tower-defence-game/releases/tag/v1.0.0
+
+From a checkout:
+
 ```bash
 flutter pub get
-flutter run
+flutter run -d chrome
 ```
 
 Choose a tower, tap a grass tile, then press Send wave. Eight waves win the match. The match is lost when the gate runs out of lives.
