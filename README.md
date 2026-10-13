@@ -12,7 +12,7 @@ https://alexalghisi.github.io/tower-defence-game/
 
 The same build is on the releases page, packed to be served from the root of a static host:
 
-https://github.com/alexalghisi/tower-defence-game/releases/tag/v1.1.0
+https://github.com/alexalghisi/tower-defence-game/releases/tag/v1.2.0
 
 From a checkout:
 
@@ -21,7 +21,7 @@ flutter pub get
 flutter run -d chrome
 ```
 
-Choose a tower and tap a grass tile. The next wave starts on its own, and each wave is faster than the last. The button calls that wave early. Eight waves win the match. The match is lost when the gate runs out of lives.
+Choose a tower and tap the grass. The column leaves Start and walks to the gate. Waves begin on their own. As the minutes pass, more rivals arrive and they move faster. The button calls the next wave early. Eight waves win the match. The match is lost when the gate runs out of lives.
 
 ## Checks
 

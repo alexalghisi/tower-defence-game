@@ -35,6 +35,10 @@ void main() {
   ) async {
     await open(tester);
     expect(find.text('Keepward'), findsOneWidget);
+    expect(
+      find.text('Build on the grass. Stop the column before the gate.'),
+      findsOneWidget,
+    );
     expect(find.text('160'), findsOneWidget);
     expect(find.text('20'), findsOneWidget);
     expect(find.text('0/8'), findsOneWidget);

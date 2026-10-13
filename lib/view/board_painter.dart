@@ -30,6 +30,7 @@ class BoardPainter extends CustomPainter {
       }
     }
     _gate(canvas);
+    _marks(canvas);
     for (final tower in state.towers) {
       _tower(canvas, tower, _aim(tower));
     }
@@ -129,6 +130,52 @@ class BoardPainter extends CustomPainter {
       post * 0.28,
       Paint()..color = const Color(0xFFF0D56A),
     );
+  }
+
+  void _marks(Canvas canvas) {
+    final start = _map(state.board.route.points.first);
+    final gate = _map(state.board.route.points.last);
+    final pole = Paint()
+      ..color = const Color(0xFF8A7A5C)
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round;
+    canvas.drawLine(start, start + Offset(0, -metrics.cell * 0.42), pole);
+    final cloth = Path()
+      ..moveTo(start.dx, start.dy - metrics.cell * 0.42)
+      ..lineTo(start.dx + metrics.cell * 0.34, start.dy - metrics.cell * 0.3)
+      ..lineTo(start.dx, start.dy - metrics.cell * 0.18)
+      ..close();
+    canvas.drawPath(cloth, Paint()..color = const Color(0xFF1F6A62));
+    _caption(canvas, start + Offset(0, -metrics.cell * 0.62), 'Start');
+    _caption(
+      canvas,
+      gate + Offset(metrics.cell * 0.22, -metrics.cell * 0.62),
+      'Gate',
+    );
+  }
+
+  void _caption(Canvas canvas, Offset at, String label) {
+    final painter = TextPainter(
+      text: TextSpan(
+        text: label,
+        style: TextStyle(
+          color: const Color(0xFFF3E6C8),
+          fontSize: metrics.cell * 0.22,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    final plate = Rect.fromCenter(
+      center: at,
+      width: painter.width + metrics.cell * 0.18,
+      height: painter.height + metrics.cell * 0.08,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(plate, const Radius.circular(4)),
+      Paint()..color = const Color(0xCC12180F),
+    );
+    painter.paint(canvas, at - Offset(painter.width / 2, painter.height / 2));
   }
 
   void _ghost(Canvas canvas) {
