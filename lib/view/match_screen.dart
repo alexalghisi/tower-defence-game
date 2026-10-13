@@ -157,6 +157,11 @@ class _StatusBar extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text('Keepward', style: style.titleLarge),
+            const SizedBox(height: 2),
+            Text(
+              'Build on the grass. Stop the column before the gate.',
+              style: style.labelMedium,
+            ),
             const SizedBox(height: 6),
             Row(
               children: [
