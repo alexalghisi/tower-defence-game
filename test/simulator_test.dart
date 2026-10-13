@@ -196,6 +196,25 @@ void main() {
     expect(state.enemies.every((enemy) => enemy.health < 80), isTrue);
   });
 
+  test('a long match sends more rivals and hurries them', () {
+    final simulator = MatchSimulator(
+      config: MatchConfig(waves: 8, roster: _pair),
+    );
+    final calm = simulator.step(simulator.sendWave(simulator.initial()), 0.01);
+    final rushed = simulator.step(
+      simulator.sendWave(simulator.initial().copyWith(elapsed: 60)),
+      0.01,
+    );
+    final calmBodies = calm.pending.length + calm.enemies.length;
+    final rushedBodies = rushed.pending.length + rushed.enemies.length;
+    expect(rushedBodies, greaterThan(calmBodies));
+    expect(rushed.spawnTimer, lessThan(calm.spawnTimer));
+    expect(
+      rushed.enemies.single.progress,
+      greaterThan(calm.enemies.single.progress),
+    );
+  });
+
   test('the next wave arms itself when the pause ends', () {
     final simulator = MatchSimulator(
       config: MatchConfig(armDelay: 5, waves: 3, roster: _one),
