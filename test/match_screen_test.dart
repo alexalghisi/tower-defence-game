@@ -56,6 +56,22 @@ void main() {
     expect(find.text('60'), findsOneWidget);
   });
 
+  testWidgets('a wave starts on its own when the pause ends', (tester) async {
+    final controller = MatchController(
+      simulator: MatchSimulator(
+        config: MatchConfig(armDelay: 1, roster: (_) => [EnemyKind.grunt]),
+      ),
+    );
+    await open(tester, controller: controller);
+    controller.tick(0.4);
+    await tester.pump();
+    expect(find.text('0/8'), findsOneWidget);
+    controller.tick(0.7);
+    await tester.pump();
+    expect(find.text('1/8'), findsOneWidget);
+    expect(find.text('Wave in progress'), findsOneWidget);
+  });
+
   testWidgets('sending a wave marks it in progress', (tester) async {
     await open(tester);
     await tester.tap(find.byKey(KeepwardKeys.send));
