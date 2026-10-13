@@ -82,45 +82,48 @@ class _MatchScreenState extends State<MatchScreen>
       builder: (context, _) {
         final state = _controller.state;
         final busy = state.status == WaveStatus.active;
-        return Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  _StatusBar(state: state),
-                  const SizedBox(height: 12),
-                  Expanded(
-                    child: _Board(
-                      controller: _controller,
-                      hover: _hover,
-                      onHover: _setHover,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  _TowerDock(
-                    selected: state.selected,
-                    onSelect: _controller.select,
-                  ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
-                      key: KeepwardKeys.send,
-                      onPressed: busy ? null : _controller.sendWave,
-                      child: Text(
-                        busy
-                            ? 'Wave in progress'
-                            : 'Next wave ${state.armTimer.ceil()}s',
+        return SizedBox.expand(
+          child: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _StatusBar(state: state),
+                    const SizedBox(height: 12),
+                    Expanded(
+                      child: _Board(
+                        controller: _controller,
+                        hover: _hover,
+                        onHover: _setHover,
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 12),
+                    _TowerDock(
+                      selected: state.selected,
+                      onSelect: _controller.select,
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton(
+                        key: KeepwardKeys.send,
+                        onPressed: busy ? null : _controller.sendWave,
+                        child: Text(
+                          busy
+                              ? 'Wave in progress'
+                              : 'Next wave ${state.armTimer.ceil()}s',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            if (state.outcome != MatchOutcome.ongoing)
-              _Outcome(state: state, onRestart: _controller.restart),
-          ],
+              if (state.outcome != MatchOutcome.ongoing)
+                _Outcome(state: state, onRestart: _controller.restart),
+            ],
+          ),
         );
       },
     );
@@ -142,29 +145,47 @@ class _StatusBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final style = Theme.of(context).textTheme;
-    return Wrap(
-      alignment: WrapAlignment.spaceBetween,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      spacing: 16,
-      runSpacing: 8,
-      children: [
-        Text('Keepward', style: style.titleLarge),
-        _Stat(
-          label: 'Gold',
-          value: '${state.gold}',
-          valueKey: KeepwardKeys.gold,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xFF1B2416),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFF3C4632)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text('Keepward', style: style.titleLarge),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                Expanded(
+                  child: _Stat(
+                    label: 'Gold',
+                    value: '${state.gold}',
+                    valueKey: KeepwardKeys.gold,
+                  ),
+                ),
+                Expanded(
+                  child: _Stat(
+                    label: 'Lives',
+                    value: '${state.lives}',
+                    valueKey: KeepwardKeys.lives,
+                  ),
+                ),
+                Expanded(
+                  child: _Stat(
+                    label: 'Wave',
+                    value: '${state.wave}/${state.waveCount}',
+                    valueKey: KeepwardKeys.wave,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
-        _Stat(
-          label: 'Lives',
-          value: '${state.lives}',
-          valueKey: KeepwardKeys.lives,
-        ),
-        _Stat(
-          label: 'Wave',
-          value: '${state.wave}/${state.waveCount}',
-          valueKey: KeepwardKeys.wave,
-        ),
-      ],
+      ),
     );
   }
 }
@@ -183,13 +204,17 @@ class _Stat extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final style = Theme.of(context).textTheme;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(label, style: style.labelMedium),
-        const SizedBox(width: 6),
-        Text(value, key: valueKey, style: style.bodyMedium),
-      ],
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: Alignment.centerLeft,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(label, style: style.labelMedium),
+          const SizedBox(width: 6),
+          Text(value, key: valueKey, style: style.bodyMedium),
+        ],
+      ),
     );
   }
 }
@@ -207,46 +232,55 @@ class _Board extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: ColoredBox(
-        color: const Color(0xFF1A2414),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final state = controller.state;
-            final metrics = BoardMetrics.fit(
-              Size(constraints.maxWidth, constraints.maxHeight),
-              state.board.columns,
-              state.board.rows,
-            );
-            return Semantics(
-              label: 'Battle board',
-              child: MouseRegion(
-                onHover: (event) =>
-                    onHover(metrics.cellAt(event.localPosition)),
-                onExit: (_) => onHover(null),
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTapDown: (details) {
-                    final cell = metrics.cellAt(details.localPosition);
-                    if (cell == null) {
-                      return;
-                    }
-                    controller.place(cell.column, cell.row);
-                  },
-                  child: CustomPaint(
-                    key: KeepwardKeys.board,
-                    painter: BoardPainter(
-                      state: state,
-                      metrics: metrics,
-                      hover: hover,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFD7A441), width: 1.5),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(4),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: ColoredBox(
+            color: const Color(0xFF10160E),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final state = controller.state;
+                final metrics = BoardMetrics.fit(
+                  Size(constraints.maxWidth, constraints.maxHeight),
+                  state.board.columns,
+                  state.board.rows,
+                );
+                return Semantics(
+                  label: 'Battle board',
+                  child: MouseRegion(
+                    onHover: (event) =>
+                        onHover(metrics.cellAt(event.localPosition)),
+                    onExit: (_) => onHover(null),
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTapDown: (details) {
+                        final cell = metrics.cellAt(details.localPosition);
+                        if (cell == null) {
+                          return;
+                        }
+                        controller.place(cell.column, cell.row);
+                      },
+                      child: CustomPaint(
+                        key: KeepwardKeys.board,
+                        painter: BoardPainter(
+                          state: state,
+                          metrics: metrics,
+                          hover: hover,
+                        ),
+                        child: const SizedBox.expand(),
+                      ),
                     ),
-                    child: const SizedBox.expand(),
                   ),
-                ),
-              ),
-            );
-          },
+                );
+              },
+            ),
+          ),
         ),
       ),
     );
@@ -261,19 +295,25 @@ class _TowerDock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        for (final kind in TowerKind.values) ...[
-          Expanded(
-            child: _TowerButton(
-              kind: kind,
-              selected: kind == selected,
-              onPressed: () => onSelect(kind),
-            ),
-          ),
-          if (kind != TowerKind.frost) const SizedBox(width: 8),
-        ],
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final slot = (constraints.maxWidth - 16) / TowerKind.values.length;
+        return Row(
+          children: [
+            for (final kind in TowerKind.values) ...[
+              SizedBox(
+                width: slot,
+                child: _TowerButton(
+                  kind: kind,
+                  selected: kind == selected,
+                  onPressed: () => onSelect(kind),
+                ),
+              ),
+              if (kind != TowerKind.frost) const SizedBox(width: 8),
+            ],
+          ],
+        );
+      },
     );
   }
 }
@@ -308,14 +348,30 @@ class _TowerButton extends StatelessWidget {
         onTap: onPressed,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-          child: Column(
-            children: [
-              Text(profile.label, style: style.bodyMedium),
-              Text(
-                '${profile.cost}  ${profile.trait}',
-                style: style.labelMedium,
-              ),
-            ],
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Column(
+              children: [
+                Container(
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color: switch (kind) {
+                      TowerKind.archer => const Color(0xFF1F6A62),
+                      TowerKind.cannon => const Color(0xFFC6A15A),
+                      TowerKind.frost => const Color(0xFF9EE0EA),
+                    },
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(profile.label, style: style.bodyMedium),
+                Text(
+                  '${profile.cost}  ${profile.trait}',
+                  style: style.labelMedium,
+                ),
+              ],
+            ),
           ),
         ),
       ),

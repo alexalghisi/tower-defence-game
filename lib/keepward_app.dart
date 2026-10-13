@@ -19,7 +19,7 @@ class KeepwardApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF12180F),
+        scaffoldBackgroundColor: const Color(0xFF0C120B),
         colorScheme: const ColorScheme.dark(
           surface: Color(0xFF1B2416),
           primary: gold,

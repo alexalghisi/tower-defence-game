@@ -22,7 +22,7 @@ class BoardPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     canvas.drawRect(
       Offset.zero & size,
-      Paint()..color = const Color(0xFF1A2414),
+      Paint()..color = const Color(0xFF10160E),
     );
     for (var row = 0; row < state.board.rows; row++) {
       for (var column = 0; column < state.board.columns; column++) {
@@ -46,47 +46,88 @@ class BoardPainter extends CustomPainter {
     final rect = metrics.tile(column, row).deflate(metrics.cell * 0.04);
     final onPath = state.board.path.contains(Cell(column, row));
     final grass = (column + row).isEven
-        ? const Color(0xFF3E6B34)
-        : const Color(0xFF46753A);
-    final paint = Paint()..color = onPath ? const Color(0xFFC6A15A) : grass;
+        ? const Color(0xFF2C5528)
+        : const Color(0xFF346230);
+    final radius = Radius.circular(metrics.cell * 0.16);
     canvas.drawRRect(
-      RRect.fromRectAndRadius(rect, Radius.circular(metrics.cell * 0.12)),
-      paint,
+      RRect.fromRectAndRadius(rect, radius),
+      Paint()..color = onPath ? const Color(0xFF6E522C) : grass,
     );
     if (onPath) {
       canvas.drawRRect(
         RRect.fromRectAndRadius(
-          rect.deflate(metrics.cell * 0.16),
+          rect.deflate(metrics.cell * 0.14),
+          Radius.circular(metrics.cell * 0.1),
+        ),
+        Paint()..color = const Color(0xFFC6A15A),
+      );
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          rect.deflate(metrics.cell * 0.28),
           Radius.circular(metrics.cell * 0.08),
         ),
-        Paint()..color = const Color(0xFFD8BC7A),
+        Paint()..color = const Color(0xFFE4C98A),
       );
-    } else if ((column * 5 + row * 3) % 7 == 0) {
-      canvas.drawCircle(
-        metrics.center(column, row) +
-            Offset(metrics.cell * 0.16, metrics.cell * 0.1),
-        metrics.cell * 0.05,
-        Paint()..color = const Color(0xFF2C4A28),
+    } else {
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(
+            rect.left + metrics.cell * 0.08,
+            rect.top + metrics.cell * 0.06,
+            rect.width * 0.55,
+            metrics.cell * 0.08,
+          ),
+          const Radius.circular(4),
+        ),
+        Paint()..color = const Color(0x334E8A42),
       );
+      if ((column * 5 + row * 3) % 7 == 0) {
+        canvas.drawCircle(
+          metrics.center(column, row) +
+              Offset(metrics.cell * 0.16, metrics.cell * 0.12),
+          metrics.cell * 0.045,
+          Paint()..color = const Color(0xFF1E3A1C),
+        );
+      }
     }
   }
 
   void _gate(Canvas canvas) {
-    final end = state.board.route.points.last;
-    final at = _map(end);
-    final width = metrics.cell * 0.22;
-    canvas.drawRect(
+    final at = _map(state.board.route.points.last);
+    final post = metrics.cell * 0.16;
+    final door = RRect.fromRectAndRadius(
       Rect.fromCenter(
-        center: at + Offset(metrics.cell * 0.28, 0),
-        width: width,
-        height: metrics.cell * 0.72,
+        center: at + Offset(metrics.cell * 0.22, metrics.cell * 0.02),
+        width: metrics.cell * 0.42,
+        height: metrics.cell * 0.78,
       ),
-      Paint()..color = const Color(0xFF6E6248),
+      Radius.circular(metrics.cell * 0.08),
     );
+    canvas.drawRRect(door, Paint()..color = const Color(0xFF3A3124));
+    canvas.drawRRect(
+      door,
+      Paint()
+        ..color = const Color(0xFFD7A441)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2,
+    );
+    for (final side in [-1.0, 1.0]) {
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromCenter(
+            center: at + Offset(metrics.cell * 0.22 + side * post * 1.7, 0),
+            width: post,
+            height: metrics.cell * 0.92,
+          ),
+          const Radius.circular(3),
+        ),
+        Paint()..color = const Color(0xFF8A7A5C),
+      );
+    }
     canvas.drawCircle(
-      at + Offset(metrics.cell * 0.28, -metrics.cell * 0.18),
-      width * 0.28,
-      Paint()..color = const Color(0xFFD7A441),
+      at + Offset(metrics.cell * 0.22, -metrics.cell * 0.16),
+      post * 0.28,
+      Paint()..color = const Color(0xFFF0D56A),
     );
   }
 
@@ -124,6 +165,19 @@ class BoardPainter extends CustomPainter {
   void _tower(Canvas canvas, Tower tower, double angle) {
     final at = _map(tower.origin);
     final radius = metrics.cell * 0.32;
+    canvas.drawCircle(
+      at,
+      radius * 1.15,
+      Paint()..color = const Color(0xFF24301C),
+    );
+    canvas.drawCircle(
+      at,
+      radius * 1.15,
+      Paint()
+        ..color = const Color(0xFFD7A441)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.4,
+    );
     canvas.drawOval(
       Rect.fromCenter(
         center: at + Offset(0, radius * 0.45),
@@ -143,13 +197,25 @@ class BoardPainter extends CustomPainter {
   }
 
   void _archer(Canvas canvas, Offset at, double radius, double angle) {
-    canvas.drawCircle(at, radius, Paint()..color = const Color(0xFF6B3E22));
+    canvas.drawCircle(at, radius, Paint()..color = const Color(0xFF7A4A28));
+    canvas.drawCircle(
+      at + Offset(0, radius * 0.12),
+      radius * 0.55,
+      Paint()..color = const Color(0xFF5C3418),
+    );
     final roof = Path()
-      ..moveTo(at.dx, at.dy - radius * 1.25)
-      ..lineTo(at.dx + radius, at.dy - radius * 0.15)
-      ..lineTo(at.dx - radius, at.dy - radius * 0.15)
+      ..moveTo(at.dx, at.dy - radius * 1.35)
+      ..lineTo(at.dx + radius * 1.05, at.dy - radius * 0.2)
+      ..lineTo(at.dx - radius * 1.05, at.dy - radius * 0.2)
       ..close();
-    canvas.drawPath(roof, Paint()..color = const Color(0xFF2F5D50));
+    canvas.drawPath(roof, Paint()..color = const Color(0xFF1F6A62));
+    canvas.drawPath(
+      roof,
+      Paint()
+        ..color = const Color(0xFFD7A441)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.2,
+    );
     canvas.save();
     canvas.translate(at.dx, at.dy);
     canvas.rotate(angle);
@@ -168,11 +234,16 @@ class BoardPainter extends CustomPainter {
   }
 
   void _cannon(Canvas canvas, Offset at, double radius, double angle) {
-    canvas.drawCircle(at, radius, Paint()..color = const Color(0xFF4E555C));
+    canvas.drawCircle(at, radius, Paint()..color = const Color(0xFF596068));
     canvas.drawCircle(
       at,
-      radius * 0.45,
-      Paint()..color = const Color(0xFF2E343A),
+      radius * 0.62,
+      Paint()..color = const Color(0xFFC6A15A),
+    );
+    canvas.drawCircle(
+      at,
+      radius * 0.4,
+      Paint()..color = const Color(0xFF2A3036),
     );
     canvas.save();
     canvas.translate(at.dx, at.dy);
@@ -198,7 +269,12 @@ class BoardPainter extends CustomPainter {
       ..lineTo(at.dx, at.dy + radius * 1.05)
       ..lineTo(at.dx - radius * 0.85, at.dy)
       ..close();
-    canvas.drawPath(gem, Paint()..color = const Color(0xFF7EC8D6));
+    canvas.drawCircle(
+      at + Offset(0, radius * 0.15),
+      radius * 0.72,
+      Paint()..color = const Color(0xFF16343C),
+    );
+    canvas.drawPath(gem, Paint()..color = const Color(0xFF9EE0EA));
     canvas.drawPath(
       gem,
       Paint()
@@ -213,15 +289,47 @@ class BoardPainter extends CustomPainter {
     final profile = enemyProfiles[enemy.kind]!;
     final radius = switch (enemy.kind) {
       EnemyKind.grunt => metrics.cell * 0.2,
-      EnemyKind.runner => metrics.cell * 0.16,
-      EnemyKind.brute => metrics.cell * 0.3,
+      EnemyKind.runner => metrics.cell * 0.15,
+      EnemyKind.brute => metrics.cell * 0.28,
     };
     final fill = switch (enemy.kind) {
-      EnemyKind.grunt => const Color(0xFF8A4B2F),
-      EnemyKind.runner => const Color(0xFFD07A2F),
-      EnemyKind.brute => const Color(0xFF6E2430),
+      EnemyKind.grunt => const Color(0xFF8C4E32),
+      EnemyKind.runner => const Color(0xFFE08A32),
+      EnemyKind.brute => const Color(0xFF7A2434),
     };
-    canvas.drawCircle(at, radius, Paint()..color = fill);
+    final stretch = enemy.kind == EnemyKind.runner ? 1.35 : 1.05;
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: at + Offset(0, radius * 0.35),
+        width: radius * 2.1,
+        height: radius * 0.7,
+      ),
+      Paint()..color = const Color(0x44000000),
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(
+          center: at,
+          width: radius * 2 * stretch,
+          height: radius * 2,
+        ),
+        Radius.circular(radius),
+      ),
+      Paint()..color = fill,
+    );
+    if (enemy.kind == EnemyKind.brute) {
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromCenter(
+            center: at + Offset(0, -radius * 0.15),
+            width: radius * 1.7,
+            height: radius * 0.55,
+          ),
+          const Radius.circular(3),
+        ),
+        Paint()..color = const Color(0xFF4A1822),
+      );
+    }
     canvas.drawCircle(
       at + Offset(-radius * 0.28, -radius * 0.15),
       radius * 0.12,
@@ -258,14 +366,23 @@ class BoardPainter extends CustomPainter {
     final at = _map(bolt.position);
     final color = switch (bolt.kind) {
       TowerKind.archer => const Color(0xFFF0D56A),
-      TowerKind.cannon => const Color(0xFF2B2B2B),
+      TowerKind.cannon => const Color(0xFF2B241C),
       TowerKind.frost => const Color(0xFFD5F4FA),
     };
+    final radius = metrics.cell * (bolt.kind == TowerKind.cannon ? 0.13 : 0.08);
     canvas.drawCircle(
       at,
-      metrics.cell * (bolt.kind == TowerKind.cannon ? 0.12 : 0.08),
-      Paint()..color = color,
+      radius * 1.8,
+      Paint()..color = color.withValues(alpha: 0.35),
     );
+    canvas.drawCircle(at, radius, Paint()..color = color);
+    if (bolt.kind == TowerKind.cannon) {
+      canvas.drawCircle(
+        at,
+        radius * 0.45,
+        Paint()..color = const Color(0xFFE07A32),
+      );
+    }
   }
 
   double _aim(Tower tower) {
