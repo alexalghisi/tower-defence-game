@@ -52,6 +52,7 @@ class MatchSimulator {
       pending: const [],
       spawnTimer: 0,
       armTimer: config.armDelay,
+      elapsed: 0,
       nextId: 1,
     );
   }
@@ -102,10 +103,14 @@ class MatchSimulator {
       return state;
     }
     final wave = state.wave + 1;
+    final extra = math.min(8, state.elapsed ~/ 15);
     return state.copyWith(
       wave: wave,
       status: WaveStatus.active,
-      pending: config.roster(wave),
+      pending: [
+        ...config.roster(wave),
+        for (var i = 0; i < extra; i++) EnemyKind.grunt,
+      ],
       spawnTimer: 0,
     );
   }
@@ -114,6 +119,7 @@ class MatchSimulator {
     if (state.outcome != MatchOutcome.ongoing || dt <= 0) {
       return state;
     }
+    state = state.copyWith(elapsed: state.elapsed + dt);
     if (state.status == WaveStatus.ready) {
       if (state.wave >= config.waves) {
         return state;
@@ -149,11 +155,11 @@ class MatchSimulator {
           ),
         );
         nextId += 1;
-        timer += config.spawnGap / _pace(state.wave);
+        timer += config.spawnGap / _pressure(state);
       }
     }
 
-    final haste = _pace(state.wave);
+    final haste = _pressure(state);
     final stayed = <Enemy>[];
     for (final enemy in enemies) {
       final profile = enemyProfiles[enemy.kind]!;
@@ -277,6 +283,10 @@ class MatchSimulator {
   double _pace(int wave) {
     final level = wave < 1 ? 1 : wave;
     return 1 + (level - 1) * config.paceStep;
+  }
+
+  double _pressure(MatchState state) {
+    return _pace(state.wave) * (1 + state.elapsed / 60);
   }
 
   Enemy? _acquire(Board board, List<Enemy> enemies, Tower tower, double range) {
