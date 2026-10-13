@@ -108,7 +108,11 @@ class _MatchScreenState extends State<MatchScreen>
                     child: FilledButton(
                       key: KeepwardKeys.send,
                       onPressed: busy ? null : _controller.sendWave,
-                      child: Text(busy ? 'Wave in progress' : 'Send wave'),
+                      child: Text(
+                        busy
+                            ? 'Wave in progress'
+                            : 'Next wave ${state.armTimer.ceil()}s',
+                      ),
                     ),
                   ),
                 ],

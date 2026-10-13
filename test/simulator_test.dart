@@ -196,6 +196,56 @@ void main() {
     expect(state.enemies.every((enemy) => enemy.health < 80), isTrue);
   });
 
+  test('the next wave arms itself when the pause ends', () {
+    final simulator = MatchSimulator(
+      config: MatchConfig(armDelay: 5, waves: 3, roster: _one),
+    );
+    final waiting = simulator.step(simulator.initial(), 4);
+    expect(waiting.wave, 0);
+    expect(waiting.status, WaveStatus.ready);
+
+    final marching = simulator.step(waiting, 1.1);
+    expect(marching.wave, 1);
+    expect(marching.status, WaveStatus.active);
+    expect(marching.enemies, isNotEmpty);
+  });
+
+  test('later waves close the spawn gap and raise the pace', () {
+    final simulator = MatchSimulator(
+      config: MatchConfig(waves: 8, roster: _pair, paceStep: 0.25),
+    );
+    final first = simulator.step(simulator.sendWave(simulator.initial()), 0.01);
+    expect(first.spawnTimer, closeTo(0.69, 0.02));
+
+    final later = simulator.step(
+      simulator.sendWave(
+        simulator.initial().copyWith(wave: 4, status: WaveStatus.ready),
+      ),
+      0.01,
+    );
+    expect(later.wave, 5);
+    expect(later.spawnTimer, lessThan(first.spawnTimer));
+    expect(
+      later.enemies.single.progress,
+      greaterThan(first.enemies.single.progress),
+    );
+  });
+
+  test('a cleared wave arms the following one', () {
+    final simulator = MatchSimulator(
+      config: MatchConfig(armDelay: 2, waves: 3, roster: _afterClear),
+    );
+    var state = simulator.step(simulator.sendWave(simulator.initial()), 0.01);
+    expect(state.wave, 1);
+    expect(state.status, WaveStatus.ready);
+    expect(state.outcome, MatchOutcome.ongoing);
+    state = simulator.step(state, 1.5);
+    expect(state.wave, 1);
+    state = simulator.step(state, 0.6);
+    expect(state.wave, 2);
+    expect(state.status, WaveStatus.active);
+  });
+
   test('clearing the last wave pays once and wins', () {
     final simulator = MatchSimulator(
       config: const MatchConfig(waves: 1, roster: _empty),
@@ -210,3 +260,10 @@ void main() {
 }
 
 List<EnemyKind> _empty(int wave) => const [];
+
+List<EnemyKind> _afterClear(int wave) {
+  if (wave == 1) {
+    return const [];
+  }
+  return const [EnemyKind.grunt];
+}

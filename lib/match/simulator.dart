@@ -13,6 +13,8 @@ class MatchConfig {
     this.lives = 20,
     this.waves = 8,
     this.spawnGap = 0.7,
+    this.armDelay = 8,
+    this.paceStep = 0.12,
     this.clearBonus = 25,
     this.roster = campaignRoster,
   });
@@ -21,6 +23,8 @@ class MatchConfig {
   final int lives;
   final int waves;
   final double spawnGap;
+  final double armDelay;
+  final double paceStep;
   final int clearBonus;
   final WaveRoster roster;
 }
@@ -47,6 +51,7 @@ class MatchSimulator {
       bolts: const [],
       pending: const [],
       spawnTimer: 0,
+      armTimer: config.armDelay,
       nextId: 1,
     );
   }
@@ -109,6 +114,16 @@ class MatchSimulator {
     if (state.outcome != MatchOutcome.ongoing || dt <= 0) {
       return state;
     }
+    if (state.status == WaveStatus.ready) {
+      if (state.wave >= config.waves) {
+        return state;
+      }
+      final arm = state.armTimer - dt;
+      if (arm > 0) {
+        return state.copyWith(armTimer: arm);
+      }
+      state = sendWave(state);
+    }
 
     final pending = [...state.pending];
     var enemies = [...state.enemies];
@@ -134,16 +149,19 @@ class MatchSimulator {
           ),
         );
         nextId += 1;
-        timer += config.spawnGap;
+        timer += config.spawnGap / _pace(state.wave);
       }
     }
 
+    final haste = _pace(state.wave);
     final stayed = <Enemy>[];
     for (final enemy in enemies) {
       final profile = enemyProfiles[enemy.kind]!;
-      final pace = enemy.slowRemaining > 0
-          ? profile.speed * enemy.slowFactor
-          : profile.speed;
+      final pace =
+          (enemy.slowRemaining > 0
+              ? profile.speed * enemy.slowFactor
+              : profile.speed) *
+          haste;
       final progress = enemy.progress + pace * dt;
       if (progress >= state.board.route.length) {
         lives -= profile.lives;
@@ -228,12 +246,14 @@ class MatchSimulator {
 
     var status = state.status;
     var outcome = state.outcome;
+    var armTimer = state.armTimer;
     if (status == WaveStatus.active &&
         pending.isEmpty &&
         enemies.isEmpty &&
         flying.isEmpty) {
       gold += config.clearBonus + state.wave * 5;
       status = WaveStatus.ready;
+      armTimer = config.armDelay;
       if (state.wave >= config.waves) {
         outcome = MatchOutcome.won;
       }
@@ -249,8 +269,14 @@ class MatchSimulator {
       bolts: flying,
       pending: pending,
       spawnTimer: timer,
+      armTimer: armTimer,
       nextId: nextId,
     );
+  }
+
+  double _pace(int wave) {
+    final level = wave < 1 ? 1 : wave;
+    return 1 + (level - 1) * config.paceStep;
   }
 
   Enemy? _acquire(Board board, List<Enemy> enemies, Tower tower, double range) {

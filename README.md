@@ -21,7 +21,7 @@ flutter pub get
 flutter run -d chrome
 ```
 
-Choose a tower, tap a grass tile, then press Send wave. Eight waves win the match. The match is lost when the gate runs out of lives.
+Choose a tower and tap a grass tile. The next wave starts on its own, and each wave is faster than the last. The button calls that wave early. Eight waves win the match. The match is lost when the gate runs out of lives.
 
 ## Checks
 

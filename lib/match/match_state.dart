@@ -121,6 +121,7 @@ class MatchState {
     required this.bolts,
     required this.pending,
     required this.spawnTimer,
+    required this.armTimer,
     required this.nextId,
   });
 
@@ -137,6 +138,7 @@ class MatchState {
   final List<Bolt> bolts;
   final List<EnemyKind> pending;
   final double spawnTimer;
+  final double armTimer;
   final int nextId;
 
   MatchState copyWith({
@@ -151,6 +153,7 @@ class MatchState {
     List<Bolt>? bolts,
     List<EnemyKind>? pending,
     double? spawnTimer,
+    double? armTimer,
     int? nextId,
   }) {
     return MatchState(
@@ -167,6 +170,7 @@ class MatchState {
       bolts: bolts ?? this.bolts,
       pending: pending ?? this.pending,
       spawnTimer: spawnTimer ?? this.spawnTimer,
+      armTimer: armTimer ?? this.armTimer,
       nextId: nextId ?? this.nextId,
     );
   }
