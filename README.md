@@ -12,7 +12,7 @@ https://alexalghisi.github.io/tower-defence-game/
 
 The same build is on the releases page, packed to be served from the root of a static host:
 
-https://github.com/alexalghisi/tower-defence-game/releases/tag/v1.0.0
+https://github.com/alexalghisi/tower-defence-game/releases/tag/v1.1.0
 
 From a checkout:
 
