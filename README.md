@@ -2,7 +2,7 @@
 
 Keepward is a tower defence game. A column follows one road to the gate. Archers, cannons and frost towers built on the grass have to stop it.
 
-![A match underway, with two towers firing on the first wave](docs/preview.png)
+![A match underway, with two towers firing on the first wave](docs/match.gif)
 
 ## Play
 
