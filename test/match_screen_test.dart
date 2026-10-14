@@ -39,6 +39,9 @@ void main() {
       find.text('Build on the grass. Stop the column before the gate.'),
       findsOneWidget,
     );
+    expect(find.text('Gold'), findsOneWidget);
+    expect(find.text('Lives'), findsOneWidget);
+    expect(find.text('Wave'), findsOneWidget);
     expect(find.text('160'), findsOneWidget);
     expect(find.text('20'), findsOneWidget);
     expect(find.text('0/8'), findsOneWidget);

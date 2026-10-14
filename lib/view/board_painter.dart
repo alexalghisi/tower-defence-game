@@ -31,6 +31,7 @@ class BoardPainter extends CustomPainter {
     }
     _gate(canvas);
     _marks(canvas);
+    _veil(canvas, size);
     for (final tower in state.towers) {
       _tower(canvas, tower, _aim(tower));
     }
@@ -69,6 +70,13 @@ class BoardPainter extends CustomPainter {
         ),
         Paint()..color = const Color(0xFFE4C98A),
       );
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(rect, radius),
+        Paint()
+          ..color = const Color(0xFF3A2A16)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.4,
+      );
     } else {
       canvas.drawRRect(
         RRect.fromRectAndRadius(
@@ -95,39 +103,49 @@ class BoardPainter extends CustomPainter {
 
   void _gate(Canvas canvas) {
     final at = _map(state.board.route.points.last);
-    final post = metrics.cell * 0.16;
-    final door = RRect.fromRectAndRadius(
+    final keep = at + Offset(metrics.cell * 0.22, metrics.cell * 0.02);
+    final wall = RRect.fromRectAndRadius(
       Rect.fromCenter(
-        center: at + Offset(metrics.cell * 0.22, metrics.cell * 0.02),
-        width: metrics.cell * 0.42,
-        height: metrics.cell * 0.78,
+        center: keep,
+        width: metrics.cell * 0.78,
+        height: metrics.cell * 0.86,
       ),
       Radius.circular(metrics.cell * 0.08),
     );
-    canvas.drawRRect(door, Paint()..color = const Color(0xFF3A3124));
+    canvas.drawRRect(wall, Paint()..color = const Color(0xFF4A4030));
     canvas.drawRRect(
-      door,
+      wall,
       Paint()
         ..color = const Color(0xFFD7A441)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2,
     );
-    for (final side in [-1.0, 1.0]) {
+    final merlon = metrics.cell * 0.14;
+    for (final shift in [-0.28, 0.0, 0.28]) {
       canvas.drawRRect(
         RRect.fromRectAndRadius(
           Rect.fromCenter(
-            center: at + Offset(metrics.cell * 0.22 + side * post * 1.7, 0),
-            width: post,
-            height: metrics.cell * 0.92,
+            center: keep + Offset(metrics.cell * shift, -metrics.cell * 0.48),
+            width: merlon,
+            height: merlon,
           ),
-          const Radius.circular(3),
+          const Radius.circular(2),
         ),
         Paint()..color = const Color(0xFF8A7A5C),
       );
     }
+    final door = RRect.fromRectAndRadius(
+      Rect.fromCenter(
+        center: keep + Offset(0, metrics.cell * 0.12),
+        width: metrics.cell * 0.28,
+        height: metrics.cell * 0.42,
+      ),
+      Radius.circular(metrics.cell * 0.08),
+    );
+    canvas.drawRRect(door, Paint()..color = const Color(0xFF2A2118));
     canvas.drawCircle(
-      at + Offset(metrics.cell * 0.22, -metrics.cell * 0.16),
-      post * 0.28,
+      keep + Offset(0, -metrics.cell * 0.1),
+      metrics.cell * 0.05,
       Paint()..color = const Color(0xFFF0D56A),
     );
   }
@@ -139,6 +157,11 @@ class BoardPainter extends CustomPainter {
       ..color = const Color(0xFF8A7A5C)
       ..strokeWidth = 3
       ..strokeCap = StrokeCap.round;
+    canvas.drawCircle(
+      start,
+      metrics.cell * 0.2,
+      Paint()..color = const Color(0x331F6A62),
+    );
     canvas.drawLine(start, start + Offset(0, -metrics.cell * 0.42), pole);
     final cloth = Path()
       ..moveTo(start.dx, start.dy - metrics.cell * 0.42)
@@ -176,6 +199,18 @@ class BoardPainter extends CustomPainter {
       Paint()..color = const Color(0xCC12180F),
     );
     painter.paint(canvas, at - Offset(painter.width / 2, painter.height / 2));
+  }
+
+  void _veil(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    canvas.drawRect(
+      rect,
+      Paint()
+        ..shader = RadialGradient(
+          colors: const [Color(0x00000000), Color(0x7310160E)],
+          radius: 0.92,
+        ).createShader(rect),
+    );
   }
 
   void _ghost(Canvas canvas) {
