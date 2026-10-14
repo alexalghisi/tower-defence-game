@@ -149,7 +149,7 @@ class _StatusBar extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF1B2416),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF3C4632)),
+        border: Border.all(color: const Color(0xFFD7A441), width: 1.2),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -170,20 +170,25 @@ class _StatusBar extends StatelessWidget {
                     label: 'Gold',
                     value: '${state.gold}',
                     valueKey: KeepwardKeys.gold,
+                    mark: const Color(0xFFD7A441),
                   ),
                 ),
+                const SizedBox(width: 8),
                 Expanded(
                   child: _Stat(
                     label: 'Lives',
                     value: '${state.lives}',
                     valueKey: KeepwardKeys.lives,
+                    mark: const Color(0xFFC45B4A),
                   ),
                 ),
+                const SizedBox(width: 8),
                 Expanded(
                   child: _Stat(
                     label: 'Wave',
                     value: '${state.wave}/${state.waveCount}',
                     valueKey: KeepwardKeys.wave,
+                    mark: const Color(0xFF1F6A62),
                   ),
                 ),
               ],
@@ -200,25 +205,43 @@ class _Stat extends StatelessWidget {
     required this.label,
     required this.value,
     required this.valueKey,
+    required this.mark,
   });
 
   final String label;
   final String value;
   final Key valueKey;
+  final Color mark;
 
   @override
   Widget build(BuildContext context) {
     final style = Theme.of(context).textTheme;
-    return FittedBox(
-      fit: BoxFit.scaleDown,
-      alignment: Alignment.centerLeft,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(label, style: style.labelMedium),
-          const SizedBox(width: 6),
-          Text(value, key: valueKey, style: style.bodyMedium),
-        ],
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xFF12180F),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: const Color(0xFF3C4632)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(color: mark, shape: BoxShape.circle),
+              ),
+              const SizedBox(width: 6),
+              Text(label, style: style.labelMedium),
+              const SizedBox(width: 6),
+              Text(value, key: valueKey, style: style.bodyMedium),
+            ],
+          ),
+        ),
       ),
     );
   }
