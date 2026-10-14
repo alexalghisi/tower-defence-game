@@ -163,35 +163,41 @@ class _StatusBar extends StatelessWidget {
               style: style.labelMedium,
             ),
             const SizedBox(height: 6),
-            Row(
-              children: [
-                Expanded(
-                  child: _Stat(
-                    label: 'Gold',
-                    value: '${state.gold}',
-                    valueKey: KeepwardKeys.gold,
-                    mark: const Color(0xFFD7A441),
-                  ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 560),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _Stat(
+                        label: 'Gold',
+                        value: '${state.gold}',
+                        valueKey: KeepwardKeys.gold,
+                        mark: const Color(0xFFD7A441),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _Stat(
+                        label: 'Lives',
+                        value: '${state.lives}',
+                        valueKey: KeepwardKeys.lives,
+                        mark: const Color(0xFFC45B4A),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _Stat(
+                        label: 'Wave',
+                        value: '${state.wave}/${state.waveCount}',
+                        valueKey: KeepwardKeys.wave,
+                        mark: const Color(0xFF1F6A62),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _Stat(
-                    label: 'Lives',
-                    value: '${state.lives}',
-                    valueKey: KeepwardKeys.lives,
-                    mark: const Color(0xFFC45B4A),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _Stat(
-                    label: 'Wave',
-                    value: '${state.wave}/${state.waveCount}',
-                    valueKey: KeepwardKeys.wave,
-                    mark: const Color(0xFF1F6A62),
-                  ),
-                ),
-              ],
+              ),
             ),
           ],
         ),
